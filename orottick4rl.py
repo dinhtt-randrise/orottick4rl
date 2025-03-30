@@ -606,7 +606,7 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
             USE_GITHUB = True
             
         if USE_GITHUB:
-            ok4s = github_pkg.Orottick4Simulator(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT, M4P_VRY, LOAD_CACHE_DIR, SAVE_CACHE_DIR)
+            ok4s = github_pkg.Orottick4RLSimulator(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT, M4P_VRY, LOAD_CACHE_DIR, SAVE_CACHE_DIR)
         else:
             ok4s = non_github_create_fn(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT, M4P_VRY, LOAD_CACHE_DIR, SAVE_CACHE_DIR)
                 
