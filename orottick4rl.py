@@ -208,15 +208,15 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
             if xs_p == '':
                 continue
             xl_p = [int(x) for x in xs_p.split(', ')]
-            if self.rnd_format.match(xl_w, xl_p, 'm4'):
+            if self.match(xl_w, xl_p, 'm4'):
                 m4 += 1
-            if self.rnd_format.match(xl_w, xl_p, 'm3f'):
+            if self.match(xl_w, xl_p, 'm3f'):
                 m3f += 1
-            if self.rnd_format.match(xl_w, xl_p, 'm3l'):
+            if self.match(xl_w, xl_p, 'm3l'):
                 m3l += 1
-            if self.rnd_format.match(xl_w, xl_p, 'm3'):
+            if self.match(xl_w, xl_p, 'm3'):
                 m3 += 1
-            if self.rnd_format.match(xl_w, xl_p, 'm2'):
+            if self.match(xl_w, xl_p, 'm2'):
                 m2 += 1
             nlp.append(str(xl_p[0]))
         sp = ', '.join(nlp)
