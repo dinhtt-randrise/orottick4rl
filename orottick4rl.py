@@ -204,7 +204,7 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
         m2 = 0
         xl_w = prd_moment.get_win_rnd_num_list()
         for xs_p in lp:
-            xs_p = xs_p.trim()
+            xs_p = xs_p.strip()
             if xs_p == '':
                 continue
             xl_p = [int(x) for x in xs_p.split(', ')]
