@@ -222,7 +222,7 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
         sp = ', '.join(nlp)
         m4_rsi = o_json_pred['ma_rsi']
 
-        json_pred = {'time_no': o_json_pred['time_no'], 'date': date, 'buy_date': buy_date, 'next_date': next_date, 'w': w, 'n': n, 'sim_seed': o_json_pred['sim_seed'], 'date_cnt': o_json_pred['prc_time_cnt'], 'tck_cnt': o_json_pred['tck_cnt'], 'sim_cnt': o_json_pred['sim_cnt'], 'pred': lp, 'm4_rsi': m4_rsi, 'm4pc': 0, 'pcnt': 1, 'm4': m4, 'm3f': m3f, 'm3l': m3l, 'm3': m3, 'm2': m2, 'm4_cnt': m4, 'm3f_cnt': m3f, 'm3l_cnt': m3l, 'm3': m3, 'm2': m2, 'mb_m4': 0, 'mb_m3f': 0, 'mb_m3l': 0, 'mb_m3': 0, 'mb_m2': 0}
+        json_pred = {'time_no': int(o_json_pred['time_no']), 'date': date, 'buy_date': buy_date, 'next_date': next_date, 'w': int(w), 'n': int(n), 'sim_seed': int(o_json_pred['sim_seed']), 'date_cnt': int(o_json_pred['prc_time_cnt']), 'tck_cnt': int(o_json_pred['tck_cnt']), 'sim_cnt': o_json_pred['sim_cnt'], 'pred': sp, 'm4_rsi': int(m4_rsi), 'm4pc': int(0), 'pcnt': int(1), 'm4': int(m4), 'm3f': int(m3f), 'm3l': int(m3l), 'm3': int(m3), 'm2': int(m2), 'm4_cnt': int(m4), 'm3f_cnt': int(m3f), 'm3l_cnt': int(m3l), 'm3': int(m3), 'm2': int(m2), 'mb_m4': int(0), 'mb_m3f': int(0), 'mb_m3l': int(0), 'mb_m3': int(0), 'mb_m2': int(0)}
 
         return json_pred
 
