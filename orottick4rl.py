@@ -411,7 +411,7 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
             z_data = {'date': z_date, 'buy_date': z_buy_date, 'next_date': z_next_date}
             self.rnd_format.import_dict_time_data(z_time_no, z_data)
             
-        prd_sim = self.rnd_format.create_simulator()
+        prd_sim = self.rnd_format.create_random_simulator()
         sdf, mdf, pdf, json_pred, n_json_pred = prd_sim.simulate(data_df, prd_time_no, v_date_cnt, runtime, tck_cnt, self.has_step_log, cache_only)
 
         cols = ['time_no_1', 'date_1', 'buy_date_1', 'next_date_1', 'w_1_1', 'n_1_1', 'sim_seed_1', 'sim_cnt_1', 'time_no_2', 'date_2', 'buy_date_2', 'next_date_2', 'w_2_1', 'n_2_1', 'p_1', 'm4', 'm3f', 'm3l', 'm3', 'm2', 'm4_cnt', 'm3f_cnt', 'm3l_cnt', 'm3_cnt', 'm2_cnt']
