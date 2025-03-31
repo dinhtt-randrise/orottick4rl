@@ -84,7 +84,7 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
         return ['m4', 'm3f', 'm3l', 'm3', 'm2']
 
     def match(self, win_rnd_num_list, prd_rnd_num_list, match_kind = 'ma'):
-        if len(win_rnd_num_list) != self.moment_size or len(prd_rnd_num_list) != self.moment_size:
+        if len(win_rnd_num_list) != self.get_size() or len(prd_rnd_num_list) != self.get_size():
             return False
         w = win_rnd_num_list[0]
         p = prd_rnd_num_list[0]
