@@ -50,7 +50,7 @@ import randife.randife as vrl
 
 class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
     def __init__(self, load_cache_dir = '/kaggle/working', save_cache_dir = '/kaggle/working'):
-        super().__init__(1, [0], [9999], 0, 9999, -1, load_cache_dir, save_cache_dir, None, None, None, None)
+        super().__init__(1, [0], [9999], 0, 9999, -1, load_cache_dir, save_cache_dir)
         self.baseset = {0: 1000, 1: 100, 2: 10, 3: 1}
 
     def a2n(self, a):
@@ -80,24 +80,15 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
         except Exception as e:
             return None
 
-    def create_moment(self, rnd_num_list, time_no = 1, data = {}):
-        return Orottick4RLMoment(self, rnd_num_list, time_no)
-
-    def create_moment_pair(self, moment_1, moment_2, data = {}):
-        return Orottick4RLMomentPair(self, moment_1, moment_2)
-
-    def moment_short_desc_keys(self):
-        return ['date', 'buy_date', 'next_date']
-
-    def pair_matching_keys(self):
+    def get_pair_matching_keys(self):
         return ['m4', 'm3f', 'm3l', 'm3', 'm2']
 
-    def match(self, win_rnd_num_list, prd_rnd_num_list, match_kind = 'match_all'):
+    def match(self, win_rnd_num_list, prd_rnd_num_list, match_kind = 'ma'):
         if len(win_rnd_num_list) != self.moment_size or len(prd_rnd_num_list) != self.moment_size:
             return False
         w = win_rnd_num_list[0]
         p = prd_rnd_num_list[0]
-        if match_kind == 'match_all':
+        if match_kind == 'ma':
             if w == p:
                 return True
             else:
@@ -183,8 +174,9 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
                 return text
         return ''
         
-    def refine_json_pred(self, prd_moment, o_json_pred):
-        pdata = prd_moment.get_data()
+    def refine_json_pred(self, xdf, o_json_pred):
+        x_time_no = xdf['time_no'].iloc[0]
+        pdata = self.export_dict_time_data(x_time_no)
         date = pdata['date']
         buy_date = pdata['buy_date']
         next_date = pdata['next_date']
@@ -202,7 +194,7 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
         m3l = 0
         m3 = 0
         m2 = 0
-        xl_w = prd_moment.get_win_rnd_num_list()
+        xl_w = self.import_dataset_num_list(xdf, 0, 'w')
         for xs_p in lp:
             xs_p = xs_p.strip()
             if xs_p == '':
@@ -221,19 +213,24 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
             nlp.append(str(xl_p[0]))
         sp = ', '.join(nlp)
         m4_rsi = o_json_pred['ma_rsi']
+        m4_pred = ''
 
-        json_pred = {'time_no': int(o_json_pred['time_no']), 'date': date, 'buy_date': buy_date, 'next_date': next_date, 'w': int(w), 'n': int(n), 'sim_seed': int(o_json_pred['sim_seed']), 'date_cnt': int(o_json_pred['prc_time_cnt']), 'tck_cnt': int(o_json_pred['tck_cnt']), 'sim_cnt': o_json_pred['sim_cnt'], 'pred': sp, 'm4_rsi': int(m4_rsi), 'm4pc': int(0), 'pcnt': int(1), 'm4': int(m4), 'm3f': int(m3f), 'm3l': int(m3l), 'm3': int(m3), 'm2': int(m2), 'm4_cnt': int(m4), 'm3f_cnt': int(m3f), 'm3l_cnt': int(m3l), 'm3': int(m3), 'm2': int(m2), 'mb_m4': int(0), 'mb_m3f': int(0), 'mb_m3l': int(0), 'mb_m3': int(0), 'mb_m2': int(0)}
+        json_pred = {'time_no': int(o_json_pred['time_no']), 'date': date, 'buy_date': buy_date, 'next_date': next_date, 'w': int(w), 'n': int(n), 'sim_seed': int(o_json_pred['sim_seed']), 'date_cnt': int(o_json_pred['prc_time_cnt']), 'tck_cnt': int(o_json_pred['tck_cnt']), 'sim_cnt': o_json_pred['sim_cnt'], 'pred': sp, 'm4_rsi': int(m4_rsi), 'm4pc': int(0), 'm4_pred': m4_pred, 'pcnt': int(1), 'm4': int(m4), 'm3f': int(m3f), 'm3l': int(m3l), 'm3': int(m3), 'm2': int(m2), 'm4_cnt': int(m4), 'm3f_cnt': int(m3f), 'm3l_cnt': int(m3l), 'm3': int(m3), 'm2': int(m2), 'mb_m4': int(0), 'mb_m3f': int(0), 'mb_m3l': int(0), 'mb_m3': int(0), 'mb_m2': int(0)}
 
         return json_pred
 
-class Orottick4RLMoment(vrl.RandifeMoment):
-    def __init__(self, rnd_format, rnd_num_list, time_no = 1, data = {}):
-        super().__init__(rnd_format, rnd_num_list, time_no, {'date': '', 'buy_date': '', 'next_date': ''})    
+    def trim_dataset_sim_input(self, ddf):
+        cols = ['time_no']
+        for mix in range(self.size):
+            no = mix + 1
+            cols.append(f'w_{no}')
+        for mix in range(self.size):
+            no = mix + 1
+            cols.append(f'n_{no}')
+        cols.append('sim_seed')
+        cols.append('sim_cnt')
+        return ddf[cols]
 
-class Orottick4RLMomentPair(vrl.RandifeMomentPair):
-    def __init__(self, rnd_format, moment_1, moment_2, data = {}):
-        super().__init__(rnd_format, moment_1, moment_2, {'m4': 0, 'm3f': 0, 'm3l': 0, 'm3': 0, 'm2': 0, 'm4_cnt': 0, 'm3f_cnt': 0, 'm3l_cnt': 0, 'm3_cnt': 0, 'm2_cnt': 0})
-        
 class Orottick4RLSimulator:
     def __init__(self, prd_sort_order = 'A', has_step_log = True, m4p_obs = False, m4p_cnt = -1, m4p_vry = True, load_cache_dir = '/kaggle/working', save_cache_dir = '/kaggle/working', heading_printed = False):
         self.heading_printed = heading_printed
@@ -405,9 +402,65 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
         xdf = data_df[data_df['buy_date'] == v_buy_date]
         prd_time_no = xdf['time_no'].iloc[0]
 
+        self.rnd_format.reset_dict_time_data()
+        for rwi in range(len(data_df)):
+            z_time_no = data_df['time_no'].iloc[rwi]
+            z_date = data_df['date'].iloc[rwi]
+            z_buy_date = data_df['buy_date'].iloc[rwi]
+            z_next_date = data_df['next_date'].iloc[rwi]
+            z_data = {'date': z_date, 'buy_date': z_buy_date, 'next_date': z_next_date}
+            self.rnd_format.import_dict_time_data(z_time_no, z_data)
+            
         prd_sim = self.rnd_format.create_simulator()
-        prc_df, json_pred, n_json_pred, zdf, pdf = prd_sim.simulate(data_df, prd_time_no, v_date_cnt, runtime, tck_cnt, self.has_step_log, cache_only)
-        return zdf, n_json_pred, pdf
+        sdf, mdf, pdf, json_pred, n_json_pred = prd_sim.simulate(data_df, prd_time_no, v_date_cnt, runtime, tck_cnt, self.has_step_log, cache_only)
+
+        cols = ['time_no_1', 'date_1', 'buy_date_1', 'next_date_1', 'w_1_1', 'n_1_1', 'sim_seed_1', 'sim_cnt_1', 'time_no_2', 'date_2', 'buy_date_2', 'next_date_2', 'w_2_1', 'n_2_1', 'p_1', 'm4', 'm3f', 'm3l', 'm3', 'm2', 'm4_cnt', 'm3f_cnt', 'm3l_cnt', 'm3_cnt', 'm2_cnt']
+        if mdf is not None:
+            mdf['date_1'] = ''
+            mdf['buy_date_1'] = ''
+            mdf['next_date_1'] = ''
+            mdf['date_2'] = ''
+            mdf['buy_date_2'] = ''
+            mdf['next_date_2'] = ''
+            for rwi in range(len(mdf)):
+                no = 1
+                z_time_no = mdf[f'time_no_{no}']
+                z_data = self.rnd_format.export_dict_time_data(z_time_no)
+                self.rnd_format.export_dataset_num(mdf, rwi, f'date_{no}', z_data['date'])
+                self.rnd_format.export_dataset_num(mdf, rwi, f'buy_date_{no}', z_data['buy_date'])
+                self.rnd_format.export_dataset_num(mdf, rwi, f'next_date_{no}', z_data['next_date'])
+                no = 2
+                z_time_no = mdf[f'time_no_{no}']
+                z_data = self.rnd_format.export_dict_time_data(z_time_no)
+                self.rnd_format.export_dataset_num(mdf, rwi, f'date_{no}', z_data['date'])
+                self.rnd_format.export_dataset_num(mdf, rwi, f'buy_date_{no}', z_data['buy_date'])
+                self.rnd_format.export_dataset_num(mdf, rwi, f'next_date_{no}', z_data['next_date'])
+            mdf = mdf[cols]
+
+        cols = ['time_no_1', 'date_1', 'buy_date_1', 'next_date_1', 'w_1_1', 'n_1_1', 'sim_seed_1', 'sim_cnt_1', 'time_no_2', 'date_2', 'buy_date_2', 'next_date_2', 'w_2_1', 'n_2_1', 'p_1', 'fp_1', 'm4', 'm3f', 'm3l', 'm3', 'm2', 'm4_cnt', 'm3f_cnt', 'm3l_cnt', 'm3_cnt', 'm2_cnt']
+        if pdf is not None:
+            pdf['date_1'] = ''
+            pdf['buy_date_1'] = ''
+            pdf['next_date_1'] = ''
+            pdf['date_2'] = ''
+            pdf['buy_date_2'] = ''
+            pdf['next_date_2'] = ''
+            for rwi in range(len(pdf)):
+                no = 1
+                z_time_no = pdf[f'time_no_{no}']
+                z_data = self.rnd_format.export_dict_time_data(z_time_no)
+                self.rnd_format.export_dataset_num(pdf, rwi, f'date_{no}', z_data['date'])
+                self.rnd_format.export_dataset_num(pdf, rwi, f'buy_date_{no}', z_data['buy_date'])
+                self.rnd_format.export_dataset_num(pdf, rwi, f'next_date_{no}', z_data['next_date'])
+                no = 2
+                z_time_no = mdf[f'time_no_{no}']
+                z_data = self.rnd_format.export_dict_time_data(z_time_no)
+                self.rnd_format.export_dataset_num(pdf, rwi, f'date_{no}', z_data['date'])
+                self.rnd_format.export_dataset_num(pdf, rwi, f'buy_date_{no}', z_data['buy_date'])
+                self.rnd_format.export_dataset_num(pdf, rwi, f'next_date_{no}', z_data['next_date'])
+            pdf = pdf[cols]
+        
+        return sdf, mdf, pdf, n_json_pred
 
     def observe(self, lotte_kind, v_buy_date, o_max_tck = 2, o_date_cnt = 56, o_runtime = 60 * 60 * 11.5, date_cnt = 56, buffer_dir = '/kaggle/buffers/orottick4', data_df = None, cache_only = False):
         self.print_heading()
@@ -496,15 +549,16 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
             if o_runtime is not None:
                 o_overtime = time.time() - start_time
                 runtime = o_runtime - o_overtime
-            zdf, json_prd, pdf = self.simulate(t_buy_date, buffer_dir, lotte_kind, data_df, date_cnt, o_max_tck, runtime, cache_only)
-            if zdf is None or json_prd is None or pdf is None:
+            sdf, mdf, pdf, json_pred = self.simulate(t_buy_date, buffer_dir, lotte_kind, data_df, date_cnt, o_max_tck, runtime, cache_only)
+            if sdf is None or mdf is None or json_prd is None or pdf is None:
                 continue
             if cache_only:
                 continue
                 
             more[f'pred_{t_buy_date}'] = json_prd
-            more[f'sim_{t_buy_date}'] = zdf
+            more[f'sim_{t_buy_date}'] = sdf
             more[f'pick_{t_buy_date}'] = pdf
+            more[f'match_{t_buy_date}'] = mdf
             
             t_pred = json_prd['pred']
             vry = True
@@ -614,9 +668,11 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
             ok4s = non_github_create_fn(PRD_SORT_ORDER, HAS_STEP_LOG, M4P_OBS, M4P_CNT, M4P_VRY, LOAD_CACHE_DIR, SAVE_CACHE_DIR)
                 
         if METHOD == 'simulate':
-            zdf, json_pred, pdf = ok4s.simulate(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, TCK_CNT, RUNTIME, CACHE_ONLY)
-            if zdf is not None:
-                zdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-sim-{BUY_DATE}.csv', index=False)
+            sdf, mdf, pdf, json_pred = ok4s.simulate(BUY_DATE, BUFFER_DIR, LOTTE_KIND, DATA_DF, DATE_CNT, TCK_CNT, RUNTIME, CACHE_ONLY)
+            if sdf is not None:
+                sdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-sim-{BUY_DATE}.csv', index=False)
+            if mdf is not None:
+                mdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-match-{BUY_DATE}.csv', index=False)
             if pdf is not None:
                 pdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-pick-{BUY_DATE}.csv', index=False)
             if json_pred is not None:
@@ -734,13 +790,36 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
                             xdf = more[key]
                             if xdf is not None:
                                 xdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-sim-{t_buy_date}.csv', index=False)
-        
+
+                        key = 'match_' + t_buy_date                
+                        if key in more:
+                            xdf = more[key]
+                            if xdf is not None:
+                                xdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-sim-{t_buy_date}.csv', index=False)
+
                         key = 'pick_' + t_buy_date                
                         if key in more:
                             xdf = more[key]
                             if xdf is not None:
                                 xdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-pick-{t_buy_date}.csv', index=False)
-        
+
+                qdf = odf[odf['m4'] <= 0]
+                if len(qdf) > 0:
+                    for ri in range(len(qdf)):
+                        t_buy_date = qdf['buy_date'].iloc[ri]
+                
+                        key = 'match_' + t_buy_date                
+                        if key in more:
+                            xdf = more[key]
+                            if xdf is not None:
+                                xdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-sim-{t_buy_date}.csv', index=False)
+
+                        key = 'pick_' + t_buy_date                
+                        if key in more:
+                            xdf = more[key]
+                            if xdf is not None:
+                                xdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-pick-{t_buy_date}.csv', index=False)
+                
         if METHOD == 'observe_range':
             start_time = time.time()
             range_idx = 0
@@ -759,6 +838,7 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
             
                 if odf is not None and more is not None and len(odf) > 0:
                     odf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-observe-{v_buy_date}.csv', index=False)
+
                     qdf = odf[odf['m4'] > 0]
                     if len(qdf) > 0:
                         for ri in range(len(qdf)):
@@ -776,12 +856,35 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
                                 xdf = more[key]
                                 if xdf is not None:
                                     xdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-sim-{t_buy_date}.csv', index=False)
-            
+    
+                            key = 'match_' + t_buy_date                
+                            if key in more:
+                                xdf = more[key]
+                                if xdf is not None:
+                                    xdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-sim-{t_buy_date}.csv', index=False)
+    
                             key = 'pick_' + t_buy_date                
                             if key in more:
                                 xdf = more[key]
                                 if xdf is not None:
                                     xdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-pick-{t_buy_date}.csv', index=False)
+    
+                    qdf = odf[odf['m4'] <= 0]
+                    if len(qdf) > 0:
+                        for ri in range(len(qdf)):
+                            t_buy_date = qdf['buy_date'].iloc[ri]
+                    
+                            key = 'match_' + t_buy_date                
+                            if key in more:
+                                xdf = more[key]
+                                if xdf is not None:
+                                    xdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-sim-{t_buy_date}.csv', index=False)
+    
+                            key = 'pick_' + t_buy_date                
+                            if key in more:
+                                xdf = more[key]
+                                if xdf is not None:
+                                    xdf.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-pick-{t_buy_date}.csv', index=False)                    
         
                 range_idx += 1
         
