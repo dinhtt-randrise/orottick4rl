@@ -93,6 +93,11 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
                 return True
             else:
                 return False
+        elif match_kind == 'm4':
+            if w == p:
+                return True
+            else:
+                return False
         elif match_kind == 'm3f':
             wa = self.n2a(w)
             pa = self.n2a(p)
@@ -213,9 +218,20 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
             nlp.append(str(xl_p[0]))
         sp = ', '.join(nlp)
         m4_rsi = o_json_pred['ma_rsi']
-        m4_pred = ''
+        
+        m4_sp = o_json_pred['ma_pred']
+        m4_lp = m4_sp.split(';')
+        m4_nlp = []
+        for xs_p in m4_lp:
+            xs_p = xs_p.strip()
+            if xs_p == '':
+                continue
+            xl_p = [int(x) for x in xs_p.split(', ')]
+            m4_nlp.append(str(xl_p[0]))
+        m4_pred = ', '.join(nlp)
+        m4pc = o_json_pred['mapc']
 
-        json_pred = {'time_no': int(o_json_pred['time_no']), 'date': date, 'buy_date': buy_date, 'next_date': next_date, 'w': int(w), 'n': int(n), 'sim_seed': int(o_json_pred['sim_seed']), 'date_cnt': int(o_json_pred['prc_time_cnt']), 'tck_cnt': int(o_json_pred['tck_cnt']), 'sim_cnt': o_json_pred['sim_cnt'], 'pred': sp, 'm4_rsi': int(m4_rsi), 'm4pc': int(0), 'm4_pred': m4_pred, 'pcnt': int(1), 'm4': int(m4), 'm3f': int(m3f), 'm3l': int(m3l), 'm3': int(m3), 'm2': int(m2), 'm4_cnt': int(m4), 'm3f_cnt': int(m3f), 'm3l_cnt': int(m3l), 'm3': int(m3), 'm2': int(m2), 'mb_m4': int(0), 'mb_m3f': int(0), 'mb_m3l': int(0), 'mb_m3': int(0), 'mb_m2': int(0)}
+        json_pred = {'time_no': int(o_json_pred['time_no']), 'date': date, 'buy_date': buy_date, 'next_date': next_date, 'w': int(w), 'n': int(n), 'sim_seed': int(o_json_pred['sim_seed']), 'date_cnt': int(o_json_pred['prc_time_cnt']), 'tck_cnt': int(o_json_pred['tck_cnt']), 'sim_cnt': o_json_pred['sim_cnt'], 'pred': sp, 'm4_rsi': int(m4_rsi), 'm4pc': int(m4pc), 'm4_pred': m4_pred, 'pcnt': int(1), 'm4': int(m4), 'm3f': int(m3f), 'm3l': int(m3l), 'm3': int(m3), 'm2': int(m2), 'm4_cnt': int(m4), 'm3f_cnt': int(m3f), 'm3l_cnt': int(m3l), 'm3': int(m3), 'm2': int(m2), 'mb_m4': int(0), 'mb_m3f': int(0), 'mb_m3l': int(0), 'mb_m3': int(0), 'mb_m2': int(0)}
 
         return json_pred
 
@@ -230,6 +246,119 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
         cols.append('sim_seed')
         cols.append('sim_cnt')
         return ddf[cols]
+
+    def capture_map(self, pdf, x_sim_seed):
+        return self.capture_m4p(pdf, x_sim_seed)
+
+    def capture_m4p_p_1(self, pdf):
+        xdf = pdf.sort_values(by=['time_no'], ascending=[False])
+        xdf = xdf[(xdf['m4'] == 0)&(xdf['m3f'] == 0)&(xdf['m3l'] == 0)&(xdf['m3'] == 0)&(xdf['m2'] == 1)&(xdf['a_m4'] == 0)&(xdf['a_m3f'] == 0)&(xdf['a_m3l'] == 0)&(xdf['a_m3'] == 0)&(xdf['a_m2'] > 0)&(xdf['m4_cnt'] > 0)&(xdf['m4_cnt'] < 10)]
+        if len(xdf) == 0:
+            return None
+        else:
+            for ri in range(len(xdf)):
+                if xdf['a_m2'].iloc[ri] * 2 == xdf['m4_cnt'].iloc[ri]:
+                    time_no = xdf['time_no'].iloc[ri]
+                    zdf = pdf[pdf['time_no'] > time_no]
+                    if len(zdf) <= 60 and len(zdf) > 30:
+                        return time_no
+                    else:
+                        return None
+            return None
+
+    def capture_m4p_p_2(self, pdf):
+        xdf = pdf.sort_values(by=['time_no'], ascending=[False])
+        xdf1 = xdf[(xdf['m4'] == 0)&(xdf['m3f'] == 0)&(xdf['m3l'] == 0)&(xdf['m2'] == 0)&(xdf['a_m4'] == 0)&(xdf['a_m3f'] == 1)&(xdf['a_m3l'] == 0)]
+        if len(xdf1) == 0:
+            return None
+        else:
+            time_no = xdf1['time_no'].iloc[0]
+            xdf2 = xdf[xdf['time_no'] == time_no]
+            if len(xdf2) == 0:
+                return None
+            else:
+                time_no = xdf2['time_no'].iloc[0]
+                zdf = pdf[pdf['time_no'] > time_no]
+                if len(zdf) <= 28 and len(zdf) > 14:
+                    return time_no
+                else:
+                    return None
+
+    def capture_m4p_p_3(self, pdf):
+        xdf = pdf.sort_values(by=['time_no'], ascending=[False])
+        xdf1 = xdf[(xdf['m4'] == 0)&(xdf['m3f'] == 0)&(xdf['m3l'] == 0)&(xdf['m3'] == 0)&(xdf['m2'] == 1)&(xdf['a_m2'] > 0)&(xdf['m4_cnt'] > 0)]
+        if len(xdf1) == 0:
+            return None
+        else:
+            xdf2 = xdf[xdf['m4'] == 1]
+            if len(xdf2) == 0:
+                return None
+            m4_time_no = xdf2['time_no'].iloc[0]
+            xdf1 = xdf1.sort_values(by=['time_no'], ascending=[False])
+            for ri in range(len(xdf1)):
+                time_no = xdf1['time_no'].iloc[ri]
+                a = xdf1['a_m2'].iloc[ri]
+                b = 2 * (xdf1['m4_cnt'].iloc[ri] / 3)
+                if a == b and time_no < m4_time_no: 
+                    zdf = pdf[pdf['time_no'] > time_no]
+                    if len(zdf) <= 36 and len(zdf) > 18:
+                        return time_no
+                    else:
+                        return None
+            return None
+            
+    def join_m4p(self, pdf, adf, l_time_no, time_no):
+        if time_no is not None:
+            if time_no not in l_time_no:
+                l_time_no.append(time_no)
+                df = pdf[pdf['time_no'] == time_no]
+                df['m4p_no'] = len(l_time_no)
+                if adf is None:
+                    adf = df
+                else:
+                    adf = pd.concat([adf, df])
+                adf = adf.sort_values(by=['m4p_no'], ascending=[True])
+        return l_time_no, adf
+        
+    def capture_m4p(self, pdf, x_sim_seed):
+        l_pred = []
+        l_time_no = []
+        adf = None
+
+        time_no = self.capture_m4p_p_1(pdf)
+        l_time_no, adf = self.join_m4p(pdf, adf, l_time_no, time_no)
+
+        sz = 0
+        if adf is not None:
+            sz = len(adf)
+        print(f'=> [M4PC-1] {l_time_no} -> {sz}')
+
+        time_no = self.capture_m4p_p_2(pdf)
+        l_time_no, adf = self.join_m4p(pdf, adf, l_time_no, time_no)
+
+        sz = 0
+        if adf is not None:
+            sz = len(adf)
+        print(f'=> [M4PC-2] {l_time_no} -> {sz}')
+
+        time_no = self.capture_m4p_p_3(pdf)
+        l_time_no, adf = self.join_m4p(pdf, adf, l_time_no, time_no)
+
+        sz = 0
+        if adf is not None:
+            sz = len(adf)
+        print(f'=> [M4PC-3] {l_time_no} -> {sz}')
+        
+        if adf is None or len(l_time_no) == 0 or len(adf) == 0:
+            return l_pred
+
+        adf = adf.sort_values(by=['m4p_no'], ascending=[True])
+        for ri in range(len(adf)):
+            x_sim_cnt = adf['sim_cnt'].iloc[ri]
+            p = self.reproduce(x_sim_seed, x_sim_cnt)
+            l_pred.append(p)
+
+        return l_pred
 
 class Orottick4RLSimulator:
     def __init__(self, prd_sort_order = 'A', has_step_log = True, m4p_obs = False, m4p_cnt = -1, m4p_vry = True, load_cache_dir = '/kaggle/working', save_cache_dir = '/kaggle/working', heading_printed = False):
@@ -412,7 +541,7 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
             self.rnd_format.import_dict_time_data(z_time_no, z_data)
             
         prd_sim = self.rnd_format.create_random_simulator()
-        sdf, mdf, pdf, json_pred, n_json_pred = prd_sim.simulate(data_df, prd_time_no, v_date_cnt, runtime, tck_cnt, self.has_step_log, cache_only)
+        sdf, mdf, pdf, json_pred, n_json_pred = prd_sim.simulate(data_df, prd_time_no, v_date_cnt, runtime, tck_cnt, self.m4p_cnt, self.has_step_log, cache_only)
 
         if mdf is not None:
             mdf['date'] = ''
