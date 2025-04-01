@@ -228,7 +228,7 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
                 continue
             xl_p = [int(x) for x in xs_p.split(', ')]
             m4_nlp.append(str(xl_p[0]))
-        m4_pred = ', '.join(nlp)
+        m4_pred = ', '.join(m4_nlp)
         m4pc = o_json_pred['mapc']
 
         json_pred = {'time_no': int(o_json_pred['time_no']), 'date': date, 'buy_date': buy_date, 'next_date': next_date, 'w': int(w), 'n': int(n), 'sim_seed': int(o_json_pred['sim_seed']), 'date_cnt': int(o_json_pred['prc_time_cnt']), 'tck_cnt': int(o_json_pred['tck_cnt']), 'sim_cnt': o_json_pred['sim_cnt'], 'pred': sp, 'm4_rsi': int(m4_rsi), 'm4pc': int(m4pc), 'm4_pred': m4_pred, 'pcnt': int(1), 'm4': int(m4), 'm3f': int(m3f), 'm3l': int(m3l), 'm3': int(m3), 'm2': int(m2), 'm4_cnt': int(m4), 'm3f_cnt': int(m3f), 'm3l_cnt': int(m3l), 'm3': int(m3), 'm2': int(m2), 'mb_m4': int(0), 'mb_m3f': int(0), 'mb_m3l': int(0), 'mb_m3': int(0), 'mb_m2': int(0)}
