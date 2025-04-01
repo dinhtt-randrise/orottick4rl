@@ -414,51 +414,27 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
         prd_sim = self.rnd_format.create_random_simulator()
         sdf, mdf, pdf, json_pred, n_json_pred = prd_sim.simulate(data_df, prd_time_no, v_date_cnt, runtime, tck_cnt, self.has_step_log, cache_only)
 
-        cols = ['time_no_1', 'date_1', 'buy_date_1', 'next_date_1', 'w_1_1', 'n_1_1', 'sim_seed_1', 'sim_cnt_1', 'time_no_2', 'date_2', 'buy_date_2', 'next_date_2', 'w_2_1', 'n_2_1', 'p_1', 'm4', 'm3f', 'm3l', 'm3', 'm2', 'm4_cnt', 'm3f_cnt', 'm3l_cnt', 'm3_cnt', 'm2_cnt']
         if mdf is not None:
-            mdf['date_1'] = ''
-            mdf['buy_date_1'] = ''
-            mdf['next_date_1'] = ''
-            mdf['date_2'] = ''
-            mdf['buy_date_2'] = ''
-            mdf['next_date_2'] = ''
+            mdf['date'] = ''
+            mdf['buy_date'] = ''
+            mdf['next_date'] = ''
             for rwi in range(len(mdf)):
-                no = 1
-                z_time_no = mdf[f'time_no_{no}']
+                z_time_no = mdf[f'time_no'].iloc[rwi]
                 z_data = self.rnd_format.export_dict_time_data(z_time_no)
-                self.rnd_format.export_dataset_num(mdf, rwi, f'date_{no}', z_data['date'])
-                self.rnd_format.export_dataset_num(mdf, rwi, f'buy_date_{no}', z_data['buy_date'])
-                self.rnd_format.export_dataset_num(mdf, rwi, f'next_date_{no}', z_data['next_date'])
-                no = 2
-                z_time_no = mdf[f'time_no_{no}']
-                z_data = self.rnd_format.export_dict_time_data(z_time_no)
-                self.rnd_format.export_dataset_num(mdf, rwi, f'date_{no}', z_data['date'])
-                self.rnd_format.export_dataset_num(mdf, rwi, f'buy_date_{no}', z_data['buy_date'])
-                self.rnd_format.export_dataset_num(mdf, rwi, f'next_date_{no}', z_data['next_date'])
-            mdf = mdf[cols]
+                self.rnd_format.export_dataset_num(mdf, rwi, f'date', z_data['date'])
+                self.rnd_format.export_dataset_num(mdf, rwi, f'buy_date', z_data['buy_date'])
+                self.rnd_format.export_dataset_num(mdf, rwi, f'next_date', z_data['next_date'])
 
-        cols = ['time_no_1', 'date_1', 'buy_date_1', 'next_date_1', 'w_1_1', 'n_1_1', 'sim_seed_1', 'sim_cnt_1', 'time_no_2', 'date_2', 'buy_date_2', 'next_date_2', 'w_2_1', 'n_2_1', 'p_1', 'fp_1', 'm4', 'm3f', 'm3l', 'm3', 'm2', 'm4_cnt', 'm3f_cnt', 'm3l_cnt', 'm3_cnt', 'm2_cnt']
         if pdf is not None:
-            pdf['date_1'] = ''
-            pdf['buy_date_1'] = ''
-            pdf['next_date_1'] = ''
-            pdf['date_2'] = ''
-            pdf['buy_date_2'] = ''
-            pdf['next_date_2'] = ''
+            pdf['date'] = ''
+            pdf['buy_date'] = ''
+            pdf['next_date'] = ''
             for rwi in range(len(pdf)):
-                no = 1
-                z_time_no = pdf[f'time_no_{no}']
+                z_time_no = pdf[f'time_no'].iloc[rwi]
                 z_data = self.rnd_format.export_dict_time_data(z_time_no)
-                self.rnd_format.export_dataset_num(pdf, rwi, f'date_{no}', z_data['date'])
-                self.rnd_format.export_dataset_num(pdf, rwi, f'buy_date_{no}', z_data['buy_date'])
-                self.rnd_format.export_dataset_num(pdf, rwi, f'next_date_{no}', z_data['next_date'])
-                no = 2
-                z_time_no = mdf[f'time_no_{no}']
-                z_data = self.rnd_format.export_dict_time_data(z_time_no)
-                self.rnd_format.export_dataset_num(pdf, rwi, f'date_{no}', z_data['date'])
-                self.rnd_format.export_dataset_num(pdf, rwi, f'buy_date_{no}', z_data['buy_date'])
-                self.rnd_format.export_dataset_num(pdf, rwi, f'next_date_{no}', z_data['next_date'])
-            pdf = pdf[cols]
+                self.rnd_format.export_dataset_num(pdf, rwi, f'date', z_data['date'])
+                self.rnd_format.export_dataset_num(pdf, rwi, f'buy_date', z_data['buy_date'])
+                self.rnd_format.export_dataset_num(pdf, rwi, f'next_date', z_data['next_date'])
         
         return sdf, mdf, pdf, n_json_pred
 
