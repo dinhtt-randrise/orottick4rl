@@ -654,7 +654,7 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
             if o_runtime is not None:
                 o_overtime = time.time() - start_time
                 runtime = o_runtime - o_overtime
-            sdf, mdf, pdf, json_pred = self.simulate(t_buy_date, buffer_dir, lotte_kind, data_df, date_cnt, o_max_tck, runtime, cache_only)
+            sdf, mdf, pdf, json_prd = self.simulate(t_buy_date, buffer_dir, lotte_kind, data_df, date_cnt, o_max_tck, runtime, cache_only)
             if sdf is None or mdf is None or json_prd is None or pdf is None:
                 continue
             if cache_only:
