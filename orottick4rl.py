@@ -567,6 +567,8 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
         return f'{lotte_kind}-pred-{buy_date}.json'
 
     def m4p_collect(self, lotte_kind, o_cnt, p_cnt, data_dirs, save_dir):
+        self.print_heading()
+        
         self.lotte_kind = lotte_kind
         rlsim = vrl.RandifeRandomSimulator(self.rnd_format)
         ma_field = 'm4'
