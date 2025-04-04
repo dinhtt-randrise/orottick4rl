@@ -177,6 +177,35 @@ class Orottick4RLRandomFormat(vrl.RandifeRandomFormat):
   ----------------------------------------
                 '''
                 return text
+
+        if method == 'map_collect':
+            if kind == 'method_start':
+                text = '''
+=============================================
+               M4P COLLECT
+  ----------------------------------------
+                '''
+                return text
+            if kind == 'method_end':
+                text = '''
+  ----------------------------------------
+               M4P COLLECT
+=============================================
+                '''
+                return text
+            if kind == 'parameters_start':
+                text = '''
+  ----------------------------------------
+               PARAMETERS
+  ----------------------------------------
+                '''
+                return text
+            if kind == 'parameters_end':
+                text = '''
+  ----------------------------------------
+                '''
+                return text
+
         return ''
         
     def refine_json_pred(self, xdf, o_json_pred):
@@ -381,6 +410,8 @@ class Orottick4RLSimulator:
 
         self.rnd_format = Orottick4RLRandomFormat(self.load_cache_dir, self.save_cache_dir)
 
+        self.lotte_kind = 'p4a'
+
     def print_heading(self):
         if self.heading_printed:
             return
@@ -405,7 +436,7 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
         ds = dd.total_seconds()
         days = int(round(ds / (60 * 60 * 24)))
         return days
-        
+
     def download_drawing(self, buffer_dir, lotte_kind, v_date):
         self.print_heading()
 
@@ -514,6 +545,36 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
         print(text) 
 
         return df
+
+    def m4p_collect_observe_glob(self):
+        lotte_kind = self.lotte_kind
+        return f'{lotte_kind}-observe-*.*.*.csv'
+
+    def m4p_collect_observe_file(self, obs_fn):
+        lotte_kind = self.lotte_kind
+        fn2 = obs_fn.split('/')[-1]
+        fn3 = fn2.replace(f'{lotte_kind}-observe-', '').replace(f'.csv', '')
+        return f'{lotte_kind}-observe-{fn3}.csv'
+
+    def m4p_collect_pick_file(self, odf, ri):
+        lotte_kind = self.lotte_kind
+        buy_date = odf['buy_date'].iloc[ri]
+        return f'{lotte_kind}-pick-{buy_date}.csv'
+
+    def m4p_collect_pred_file(self, odf, ri):
+        lotte_kind = self.lotte_kind
+        buy_date = odf['buy_date'].iloc[ri]
+        return f'{lotte_kind}-pred-{buy_date}.json'
+
+    def m4p_collect(self, lotte_kind, o_cnt, p_cnt, data_dirs, save_dir):
+        self.lotte_kind = lotte_kind
+        rlsim = vrl.RandifeRandomSimulator(self.rnd_format)
+        ma_field = 'm4'
+        fn_observe_glob = self.m4p_collect_observe_glob
+        fn_observe_file = self.m4p_collect_observe_file
+        fn_pick_file = self.m4p_collect_pick_file
+        fn_pred_file = self.m4p_collect_pred_file
+        rlsim.map_collect(o_cnt, p_cnt, ma_field, data_dirs, save_dir, fn_observe_glob, fn_observe_file, fn_pick_file, fn_pred_file)
         
     def simulate(self, v_buy_date, buffer_dir = '/kaggle/buffers/orottick4', lotte_kind = 'p4a', data_df = None, v_date_cnt = 56, tck_cnt = 2, runtime = None, cache_only = False):
         self.print_heading()
@@ -763,6 +824,8 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
         CACHE_ONLY = Orottick4RLSimulator.get_option(options, 'CACHE_ONLY', False)
         USE_GITHUB = Orottick4RLSimulator.get_option(options, 'USE_GITHUB', False)
         METHOD = Orottick4RLSimulator.get_option(options, 'METHOD', 'simulate')
+        M4P_COLLECT_DATA_DIRS = Orottick4RLSimulator.get_option(options, 'M4P_COLLECT_DATA_DIRS', [])
+        M4P_COLLECT_SAVE_DIR = Orottick4RLSimulator.get_option(options, 'M4P_COLLECT_SAVE_DIR', '/kaggle/working')
 
         if non_github_create_fn is None:
             USE_GITHUB = True
@@ -1004,5 +1067,8 @@ Oregon Lottery - Pick 4 Predictor (w/ Randife)
             if data_df is not None:
                 data_df.to_csv(f'{RESULT_DIR}/{LOTTE_KIND}-{BUY_DATE}.csv', index=False)
 
-        
+        if METHOD == 'm4p_collect':
+            ok4s.m4p_collect(LOTTE_KIND, O_DATE_CNT, DATE_CNT, M4P_COLLECT_DATA_DIRS, M4P_COLLECT_SAVE_DIR)
+
+
 # ------------------------------------------------------------ #
